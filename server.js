@@ -1,7 +1,7 @@
 const db = require('./db/connection');
-const table = require('console.table');
 const figlet = require('figlet');
 const inquirer = require('inquirer');
+const cTable = require('console.table')
 
 // database connection
 db.connect((error) => {
@@ -77,4 +77,26 @@ const promptUser = () => {
 
   });  
 
+};
+
+// view all departments
+viewAllDepartments = () => {
+  const sql = `SELECT department.id AS id, department.name AS department FROM department`;
+
+  db.query(sql, (error, response) => {
+    if (error) throw error;
+    console.table(response);
+    promptUser();
+  });
+};
+
+// view all roles
+viewAllRoles = () => {
+  const sql = `SELECT employee_role.id, employee_role.title, department.name AS department FROM employee_role INNER JOIN department ON employee_role.department_id = department.id`;
+
+  db.query(sql, (error, response) => {
+    if (error) throw error;
+    console.table(response);
+    promptUser();
+  });
 };

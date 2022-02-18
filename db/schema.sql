@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS department;
 DROP TABLE IF EXISTS employee_role;
-DROP TABLE is EXISTS employee;
+DROP TABLE IF EXISTS employee;
 
 CREATE TABLE department (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -19,6 +19,5 @@ CREATE TABLE employee (
     first_name VARCHAR(30), -- hold employee first name
     last_name VARCHAR(30), -- hold employee last name
     role_id INT, -- hold reference to employee role
-    manager_id INT -- hold reference to another employee that is the manager of the current employee 
-                   -- (null if the employee has no manager)
+    manager_id INT -- hold reference to another employee that is the manager of the current employee
 );
