@@ -34,9 +34,47 @@ const promptUser = () => {
         'Add Department', 
         'Add Role', 
         'Add Employee', 
-        'Update an Employee Role'
+        'Update an Employee Role',
+        'Exit'
       ]
     }
   ])
-  
+
+// provide the action of choices
+  .then((answers) => {
+    const {choices} = answers;
+      if (choices === 'View all Departments') {
+        viewAllDepartments();
+      }
+
+      if (choices === 'View all Roles') {
+        viewAllRoles();
+      }
+
+      if (choices === 'View all Employees') {
+        viewAllEmployees();
+      }
+
+      if (choices === 'Add Department') {
+        addDepartment();
+      }
+
+      if (choices === 'Add Role') {
+        addRole();
+      }
+
+      if (choices === 'Add Employee') {
+        addEmployee();
+      }
+
+      if (choices === 'Update an Employee Role') {
+        updateEmployeeRole();
+      }
+
+      if(choices === 'Exit') {
+        db.end();
+      }
+
+  });  
+
 };
