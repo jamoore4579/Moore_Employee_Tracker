@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS department;
-DROP TABLE IF EXISTS employee_role;
+DROP TABLE IF EXISTS role;
 DROP TABLE IF EXISTS employee;
 
 CREATE TABLE department (
@@ -7,7 +7,7 @@ CREATE TABLE department (
     name VARCHAR(30) -- hold department name
 );
 	
-CREATE TABLE employee_role (
+CREATE TABLE role (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30), -- hold role title
     salary DECIMAL, -- hold role salary

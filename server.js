@@ -81,7 +81,10 @@ const promptUser = () => {
 
 // view all departments
 viewAllDepartments = () => {
-  const sql = `SELECT department.id AS id, department.name AS department FROM department`;
+  const sql = `SELECT department.id 
+    AS id, department.name 
+    AS department 
+    FROM department`;
 
   db.query(sql, (error, response) => {
     if (error) throw error;
@@ -92,7 +95,13 @@ viewAllDepartments = () => {
 
 // view all roles
 viewAllRoles = () => {
-  const sql = `SELECT employee_role.id, employee_role.title, department.name AS department FROM employee_role INNER JOIN department ON employee_role.department_id = department.id`;
+  const sql = `SELECT 
+    role.id, 
+    role.title, 
+    department.name 
+    AS department 
+    FROM role 
+    INNER JOIN department ON role.department_id = department.id`;
 
   db.query(sql, (error, response) => {
     if (error) throw error;
@@ -100,3 +109,19 @@ viewAllRoles = () => {
     promptUser();
   });
 };
+
+// view all employees
+viewAllEmployees = () => {
+  const sql = `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS 'department', 
+    role.salary
+    FROM employee, role, department
+    WHERE department.id = role.department_id
+    AND role.id = employee.role_id
+    ORDER BY employee.id ASC`;
+  db.query(sql, (error, response) => {
+    if (error) throw error;
+    console.table(response);
+    promptUser();
+  });
+};
+
