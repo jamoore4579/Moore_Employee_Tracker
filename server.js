@@ -1,23 +1,21 @@
-const express = require('express');
 const db = require('./db/connection');
+const table = require('console.table');
+const figlet = require('figlet');
 
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-// Express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-// Default response for any other request (Not Found)
-app.use((req, res) => {
-    res.status(404).end();
-  });
-
-// Start server after DB connection
-db.connect(err => {
-  if (err) throw err;
-  console.log('Database connected.');
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+// database connection
+db.connect((error) => {
+  if (error) throw error;
+  // Figlet opening message
+  console.log('=======================================================================================')
+  console.log(figlet.textSync('Employee Tracker!', {
+      font: 'standard',
+      horizontalLayout: 'default',
+      verticalLayout: 'default',
+      width: 150,
+      whitespaceBreak: true
+  }));
+  console.log('=======================================================================================')
+  console.log('')
+  promptUser()
 });
+
