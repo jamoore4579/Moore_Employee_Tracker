@@ -31,11 +31,17 @@ const promptUser = () => {
       choices: [
         'View all Departments',
         'View all Roles', 
-        'View all Employees', 
+        'View all Employees',
+        'View all Employees by Department',
+        'View Department Budgets',
         'Add Department', 
         'Add Role', 
         'Add Employee', 
         'Update an Employee Role',
+        'Update an Employees Manager', // needs coded
+        'Delete Department', // needs coded
+        'Delete Employee Role', // needs coded
+        'Delete Employee', // needs coded
         'Exit'
       ]
     }
@@ -56,6 +62,14 @@ const promptUser = () => {
         viewAllEmployees();
       }
 
+      if (choices === 'View all Employees by Department') {
+        viewAllEmpDepart();
+      }
+
+      if (choices === 'View Department Budgets') {
+        viewDeptBudget();
+      }
+
       if (choices === 'Add Department') {
         addDepartment();
       }
@@ -70,6 +84,22 @@ const promptUser = () => {
 
       if (choices === 'Update an Employee Role') {
         updateEmployeeRole();
+      }
+
+      if (choices === 'Update an Employees Manager') {
+        updateEmpManager();
+      }
+
+      if (choices === 'Delete Department') {
+        deleteDept();
+      }
+
+      if (choices === 'Delete Employee Role') {
+        deleteEmpRole();
+      }
+
+      if (choices === 'Delete Employee') {
+        deleteEmp();
       }
 
       if(choices === 'Exit') {
@@ -125,6 +155,35 @@ viewAllEmployees = () => {
     promptUser();
   });
 };
+
+// view all employees by department
+viewAllEmpDepart = () => {
+  const sql = `SELECT employee.first_name, employee.last_name, department.name AS department
+    FROM employee
+    LEFT JOIN role ON employee.role_id = role.id
+    LEFT JOIN department ON role.department_id = department.id`;
+  db.query(sql, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    promptUser();
+  });
+};
+
+// view all departments by budget
+viewDeptBudget = () => {
+  console.log(`Budget By Department:`);
+  const sql = `SELECT department_id AS id,
+    department.name AS department,
+    SUM(salary) AS budget
+    FROM role
+    INNER JOIN department ON role.department_id = department.id GROUP BY role. department_id`
+  
+  db.query(sql, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    promptUser();
+  })
+}
 
 // add a department
 addDepartment = () => {
@@ -211,7 +270,6 @@ addRole = () => {
 }
 
 // add a new employee
-
 addEmployee = () => {
   inquirer.prompt([
     {
@@ -290,7 +348,6 @@ addEmployee = () => {
 }
 
 // update an employees role
-
 updateEmployeeRole = () => {
   const sql = 'SELECT employee.id, employee.first_name, employee.last_name, role.id AS "role_id" FROM employee, role, department WHERE department.id = role.department_id AND role.id = employee.role_id';
   db.query(sql, (err, res) => {
@@ -350,3 +407,59 @@ updateEmployeeRole = () => {
     });
   });
 };
+
+// update an employees manager
+updateEmpManager = () => {
+  const sql = `SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id
+    FROM employee`;
+  db.query(sql, (err, res) => {
+    const employeeNamesArray = [];
+    res.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`);});
+
+    inquirer
+      .prompt([
+        {
+          name: 'chosenEmployee',
+          type: 'list',
+          message: 'Which employee has a new manager?',
+          choices: employeeNamesArray
+        },
+        {
+          name: 'newManager',
+          type: 'list',
+          message: 'Who is their manager?',
+          choices: employeeNamesArray
+        }
+      ])
+      .then ((answer) => {
+        let employeeId, managerId;
+        res.forEach((employee) => {
+          if (
+            answer.chosenEmployee === `${employee.first_name} ${employee.last_name}`
+          ) {
+            employeeId = employee.id;
+          }
+
+          if (
+            answer.newManager === `${employee.first_name} ${employee.last_name}`
+          ) {
+            managerId = employee.id;
+          }
+        });
+
+        if (validate.isSame(answer.chosenEmployee, answer.newManager)) {
+          console.log(`Invalid Manager Selection`);
+          promptUser;
+        } else {
+          const sql = `UPDATE employee SET employee.manager_id = ? WHERE employee.id = ?`;
+
+          db.query(sql, [managerId, employeeId], (err) => {
+            if (err) throw err;
+            console.log(`Employee Manager Updated`);
+            promptUser();
+          }
+          )
+        }
+      })
+  })
+}
