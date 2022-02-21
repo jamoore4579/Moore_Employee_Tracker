@@ -33,12 +33,13 @@ const promptUser = () => {
         'View all Roles', 
         'View all Employees',
         'View all Employees by Department',
+        'View all Employees by Manager', // needs coded
         'View Department Budgets',
         'Add Department', 
         'Add Role', 
         'Add Employee', 
         'Update an Employee Role',
-        'Update an Employees Manager', // needs coded
+        'Update an Employees Manager',
         'Delete Department', // needs coded
         'Delete Employee Role', // needs coded
         'Delete Employee', // needs coded
@@ -64,6 +65,10 @@ const promptUser = () => {
 
       if (choices === 'View all Employees by Department') {
         viewAllEmpDepart();
+      }
+
+      if (choices === 'View all Employees by Manager') {
+        viewAllEmpManager();
       }
 
       if (choices === 'View Department Budgets') {
@@ -94,7 +99,7 @@ const promptUser = () => {
         deleteDept();
       }
 
-      if (choices === 'Delete Employee Role') {
+      if (choices === 'Delete Role') {
         deleteEmpRole();
       }
 
@@ -460,6 +465,119 @@ updateEmpManager = () => {
           }
           )
         }
+      })
+  })
+}
+
+// delete a department
+deleteDept = () => {
+  const sql = `SELECT department.id, department.name FROM department`;
+  db.query(sql, (err, res) => {
+    if (err) throw err;
+    const departmentNamesArray = [];
+    res.forEach((department) => {departmentNamesArray.push(department.name);});
+
+    inquirer
+      .prompt([
+        {
+          name: 'chosenDept',
+          type: 'list',
+          message: 'Which department would you like to remove?',
+          choices: departmentNamesArray
+        }
+      ])
+      .then((answer) => {
+        let departmentId;
+
+        res.forEach((department) => {
+          if (answer.chosenDept === department.name) {
+            departmentId = department.id;
+          }
+        });
+
+        const sql = `DELETE FROM department WHERE department.id = ?`;
+        db.query(sql, [departmentId], (err) => {
+          if (err) throw err;
+          console.log(`Department Successfully Removed`);
+          console.log(`=======================================================`)
+          viewAllDepartments();
+        })
+      })
+  })
+}
+
+// delete employee role
+deleteEmpRole = () => {
+  const sql = `SELECT role.id, role.title FROM role`;
+
+  db.query(sql, (err, res) => {
+    if (err) throw err;
+    let roleNamesArray = [];
+    res.forEach((role) => {roleNamesArray.push(role.title);});
+
+    inquirer
+      .prompt([
+        {
+          name: 'chosenRole',
+          type: 'list',
+          message: 'Which role would you like to remove?',
+          choices: roleNamesArray
+        }
+      ])
+
+      .then((answer) => {
+        let roleId;
+
+        res.forEach((role) => {
+          if (answer.chosenRole === role.title) {
+            roleId = role.id;
+          }
+        })
+
+        const sql = `DELETE FROM role WHERE role.id = ?`
+        db.query(sql, [roleId], (err) => {
+          if (err) throw err;
+          console.log(`Role Successfully Removed`);
+          console.log(`=======================================================`)
+          viewAllRoles();
+        })
+      })
+  })
+}
+
+deleteEmp = () => {
+  const sql = `SELECT employee.id, employee.first_name, employee.last_name FROM employee`;
+  
+  db.query(sql, (err, res) => {
+    if (err) throw err;
+    let employeeNamesArray = [];
+    res.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`);});
+
+    inquirer
+      .prompt([
+        {
+          name: 'chosenEmployee',
+          type: 'list',
+          message: 'Which employee would you like to remove?',
+          choices: employeeNamesArray
+        }
+      ])
+
+      .then((answer) => {
+        let employeeId;
+
+        res.forEach((employee) => {
+          if (answer.chosenEmployee === `${employee.first_name} ${employee.last_name}`)
+          {employeeId = employee.id}
+        });
+
+        const sql = `DELETE FROM employee WHERE employee.id = ?`;
+        db.query(sql, [employeeId], (err) => {
+          if (err) throw err;
+          console.log(`Employee Successfully Removed`);
+          console.log(`=======================================================`)
+          viewAllEmployees();
+        })
       })
   })
 }
