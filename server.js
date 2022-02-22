@@ -174,6 +174,20 @@ viewAllEmpDepart = () => {
   });
 };
 
+// view all employees by manager
+viewAllEmpManager = () => {
+  const sql = `SELECT employs.id AS id, employs.first_name AS first_name, employs.last_name AS last_name, 
+  role.title AS role, department.name AS department, CONCAT(employee.first_name, " ", employee.last_name) AS manager
+  FROM EMPLOYEE AS employs LEFT JOIN ROLE AS role ON employs.role_id = role.id
+  LEFT JOIN DEPARTMENT AS department ON role.department_id = department.id
+  LEFT JOIN EMPLOYEE AS employee ON employs.manager_id = employee.id`;
+  db.query(sql, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    promptUser();
+  })
+}
+
 // view all departments by budget
 viewDeptBudget = () => {
   console.log(`Budget By Department:`);
@@ -354,7 +368,9 @@ addEmployee = () => {
 
 // update an employees role
 updateEmployeeRole = () => {
-  const sql = 'SELECT employee.id, employee.first_name, employee.last_name, role.id AS "role_id" FROM employee, role, department WHERE department.id = role.department_id AND role.id = employee.role_id';
+  const sql = `SELECT employee.id, employee.first_name, employee.last_name, role.id AS role_id 
+    FROM employee, role
+    WHERE role.id = employee.role_id`;
   db.query(sql, (err, res) => {
     if(err) throw err;
     const employeeNamesArray = [];
@@ -377,35 +393,35 @@ updateEmployeeRole = () => {
           {
             name: 'chosenRole',
             type: 'list',
-            message: 'What is their role?',
+            message: 'What is their new role?',
             choices: rolesArray
           }
         ])
-        .then ((answer) => {
-          let newTitleId, employeeId;
 
+        .then ((answer) => {
+          let employId, newTitleId;
+
+          res.forEach((employee) => {
+            if (answer.chosenEmployee === `${employee.first_name} ${employee.last_name}`) {
+              employId = employee.id;
+            }
+          });
+          
           res.forEach((role) => {
-            if (answer.chosenRole === role.title) {
+            if (answer.chosenRole === `${role.title}`) {
               newTitleId = role.id;
             }
           });
 
-          res.forEach((employee) => {
-            if (
-              answer.chosenEmployee ===
-              `${employee.first_name} ${employee.last_name}`
-            ) {
-              employeeId = employee.id;
-            }
-          });
-
-          const sqls = `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
-          db.query(
-            sqls,
-            [newTitleId, employeeId],
-            (err) => {
+          const sql = `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
+            db.query(sql, [newTitleId, employId], (err) => {
+              if (err) throw err;
+              console.log(newTitleId)
+              console.log(employId)
               console.log(`Employee Role Updated`);
-              promptUser();
+              console.log(``)
+              console.log(`=======================================================`)
+              viewAllEmployees();
             }
           );
         });
@@ -460,6 +476,7 @@ updateEmpManager = () => {
 
           db.query(sql, [managerId, employeeId], (err) => {
             if (err) throw err;
+            console.log(employeeId)
             console.log(`Employee Manager Updated`);
             promptUser();
           }
@@ -545,9 +562,10 @@ deleteEmpRole = () => {
   })
 }
 
+// delete an employee
 deleteEmp = () => {
   const sql = `SELECT employee.id, employee.first_name, employee.last_name FROM employee`;
-  
+
   db.query(sql, (err, res) => {
     if (err) throw err;
     let employeeNamesArray = [];
