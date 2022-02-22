@@ -367,19 +367,19 @@ addEmployee = () => {
 }
 
 // update an employees role
-updateEmployeeRole = () => {
-  const sql = `SELECT employee.id, employee.first_name, employee.last_name, role.id AS role_id 
+const updateEmployeeRole = () => {
+  let sql = `SELECT employee.id, employee.first_name, employee.last_name, role.id AS role_id 
     FROM employee, role
     WHERE role.id = employee.role_id`;
   db.query(sql, (err, res) => {
     if(err) throw err;
-    const employeeNamesArray = [];
-    res.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`);});
+    let employeeNamesArray = [];
+    res.forEach((employee) => {employeeNamesArray.push(`${employee.id}`);});
 
-    const sql = `SELECT role.id, role.title FROM role`;
+    let sql = `SELECT role.id, role.title FROM role`;
     db.query(sql, (err, res) => {
       if (err) throw err;
-      const rolesArray = [];
+      let rolesArray = [];
       res.forEach((role) => {rolesArray.push(role.title);});
 
       inquirer
@@ -399,11 +399,11 @@ updateEmployeeRole = () => {
         ])
 
         .then ((answer) => {
-          let employId, newTitleId;
+          let employeeId, newTitleId;
 
           res.forEach((employee) => {
-            if (answer.chosenEmployee === `${employee.first_name} ${employee.last_name}`) {
-              employId = employee.id;
+            if (answer.chosenEmployee === `${employee.id}`) {
+              employeeId = employee.id;
             }
           });
           
@@ -413,12 +413,11 @@ updateEmployeeRole = () => {
             }
           });
 
-          const sql = `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
-            db.query(sql, [newTitleId, employId], (err) => {
+          let seql = `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
+            db.query(seql, [newTitleId, employeeId], (err) => {
               if (err) throw err;
-              console.log(newTitleId)
-              console.log(employId)
               console.log(`Employee Role Updated`);
+              console.log(employeeId)
               console.log(``)
               console.log(`=======================================================`)
               viewAllEmployees();
@@ -476,9 +475,10 @@ updateEmpManager = () => {
 
           db.query(sql, [managerId, employeeId], (err) => {
             if (err) throw err;
-            console.log(employeeId)
             console.log(`Employee Manager Updated`);
-            promptUser();
+            console.log(``)
+            console.log(`=======================================================`)
+            viewAllEmpManager();
           }
           )
         }
