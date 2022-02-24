@@ -33,16 +33,16 @@ const promptUser = () => {
         'View all Roles', 
         'View all Employees',
         'View all Employees by Department',
-        'View all Employees by Manager', // needs coded
+        'View all Employees by Manager',
         'View Department Budgets',
         'Add Department', 
         'Add Role', 
         'Add Employee', 
         'Update an Employee Role',
         'Update an Employees Manager',
-        'Delete Department', // needs coded
-        'Delete Employee Role', // needs coded
-        'Delete Employee', // needs coded
+        'Delete Department',
+        'Delete Employee Role',
+        'Delete Employee',
         'Exit'
       ]
     }
@@ -367,72 +367,69 @@ addEmployee = () => {
 }
 
 // update an employees role
-const updateEmployeeRole = () => {
-  let sql = `SELECT employee.id, employee.first_name, employee.last_name, role.id AS role_id 
-    FROM employee, role
-    WHERE role.id = employee.role_id`;
-  db.query(sql, (err, res) => {
-    if(err) throw err;
-    let employeeNamesArray = [];
-    res.forEach((employee) => {employeeNamesArray.push(`${employee.id}`);});
+updateEmployeeRole = () => {
+  const empsql = `SELECT * FROM employee`;
+  db.query(empsql, (err, res) => {
+    if (err) throw err;
 
-    let sql = `SELECT role.id, role.title FROM role`;
-    db.query(sql, (err, res) => {
-      if (err) throw err;
-      let rolesArray = [];
-      res.forEach((role) => {rolesArray.push(role.title);});
+  const employees = res.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
 
-      inquirer
-        .prompt([
-          {
-            name: 'chosenEmployee',
-            type: 'list',
-            message: 'Which employee has a new role?',
-            choices: employeeNamesArray
-          },
-          {
-            name: 'chosenRole',
-            type: 'list',
-            message: 'What is their new role?',
-            choices: rolesArray
-          }
-        ])
+    inquirer.prompt([
+      {
+        type: 'list',
+        name: 'name',
+        message: 'Which employee is changing roles?',
+        choices: employees
+      }
+    ])
+      .then(empChoice => {
+        const employee = empChoice.name;
+        const params = [];
+        params.push(employee);
 
-        .then ((answer) => {
-          let employeeId, newTitleId;
+        const roleSql = `SELECT * FROM role`;
 
-          res.forEach((employee) => {
-            if (answer.chosenEmployee === `${employee.id}`) {
-              employeeId = employee.id;
-            }
-          });
-          
-          res.forEach((role) => {
-            if (answer.chosenRole === `${role.title}`) {
-              newTitleId = role.id;
-            }
-          });
+        db.query(roleSql, (err, res) => {
+          if (err) throw err;
 
-          let seql = `UPDATE employee SET employee.role_id = ? WHERE employee.id = ?`;
-            db.query(seql, [newTitleId, employeeId], (err) => {
-              if (err) throw err;
-              console.log(`Employee Role Updated`);
-              console.log(employeeId)
-              console.log(``)
-              console.log(`=======================================================`)
+          const roles = res.map(({ id, title }) => ({ name: title, value: id}));
+
+            inquirer.prompt([
+              {
+                type: 'list',
+                name: 'role',
+                message: 'What is the employees new role?',
+                choices: roles
+              }
+            ])
+
+            .then(roleChoice => {
+              const role = roleChoice.role;
+              params.push(role);
+
+              let employee = params[0]
+              params[0] = role
+              params[1] = employee
+
+              const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+              db.query(sql, params, (err, res) => {
+                if (err) throw err;
+              console.log("Employee has been updated")
+
               viewAllEmployees();
-            }
-          );
-        });
-    });
-  });
-};
+              })
+            })
+        })
+      })
+  })
+}
 
 // update an employees manager
 updateEmpManager = () => {
   const sql = `SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id
     FROM employee`;
   db.query(sql, (err, res) => {
+    if (err) throw err;
     const employeeNamesArray = [];
     res.forEach((employee) => {employeeNamesArray.push(`${employee.first_name} ${employee.last_name}`);});
 
@@ -451,6 +448,8 @@ updateEmpManager = () => {
           choices: employeeNamesArray
         }
       ])
+
+      
       .then ((answer) => {
         let employeeId, managerId;
         res.forEach((employee) => {
@@ -459,7 +458,7 @@ updateEmpManager = () => {
           ) {
             employeeId = employee.id;
           }
-
+          
           if (
             answer.newManager === `${employee.first_name} ${employee.last_name}`
           ) {
@@ -467,6 +466,7 @@ updateEmpManager = () => {
           }
         });
 
+        console.log(employeeId, "Where is the difference")
         if (validate.isSame(answer.chosenEmployee, answer.newManager)) {
           console.log(`Invalid Manager Selection`);
           promptUser;
