@@ -18,7 +18,11 @@
   * Install dependacies
   * Create the databases using the db files
   * Run Server
-
+  
+  ## DEMO of Application
+  
+   Screencastify: https://drive.google.com/file/d/1ClU-Wt9AlNOv8HfwfwLXGAGKDivTRy7o/view?usp=sharing
+  
   ## Usage
   Run the following command at the root of your project and scroll through the menu provided:
   node server
