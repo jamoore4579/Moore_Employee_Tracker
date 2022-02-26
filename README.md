@@ -14,11 +14,15 @@
   * [Questions](#questions)
   
   ## Installation
-  # Clone the Repo # Install dependacies # Create the databases using the db files # Run Server
+  * Clone the Repo
+  * Install dependacies
+  * Create the databases using the db files
+  * Run Server
 
   ## Usage
-  See Install Instructions
-
+  Run the following command at the root of your project and scroll through the menu provided:
+  node server
+  
   ## License
   This project is license under MIT
 
