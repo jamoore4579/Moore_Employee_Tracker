@@ -41,7 +41,7 @@ const promptUser = () => {
         'Update an Employee Role',
         'Update an Employees Manager',
         'Delete Department',
-        'Delete Employee Role',
+        'Delete Role',
         'Delete Employee',
         'Exit'
       ]
@@ -529,19 +529,20 @@ deleteEmpRole = () => {
 
   db.query(sql, (err, res) => {
     if (err) throw err;
-    let roleNamesArray = [];
-    res.forEach((role) => {roleNamesArray.push(role.title);});
+    const roleNameArray = [];
+    res.forEach((role) => {roleNameArray.push(role.title);});
 
+    
     inquirer
       .prompt([
         {
           name: 'chosenRole',
           type: 'list',
           message: 'Which role would you like to remove?',
-          choices: roleNamesArray
+          choices: roleNameArray
         }
       ])
-
+      
       .then((answer) => {
         let roleId;
 
